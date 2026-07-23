@@ -1,0 +1,36 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx @claude-flow/cli@latest hooks pre-edit --file \"$CLAUDE_FILE_PATH\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx @claude-flow/cli@latest hooks post-edit --file \"$CLAUDE_FILE_PATH\" --format true"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx @claude-flow/cli@latest hooks session-end --store-results true"
+          }
+        ]
+      }
+    ]
+  }
+}
