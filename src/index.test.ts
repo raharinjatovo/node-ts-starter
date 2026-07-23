@@ -64,4 +64,18 @@ describe("greet", () => {
     const astral = "𝔘𝔫𝔦𝔠𝔬𝔡𝔢"; // Mathematical Fraktur, outside BMP
     expect(greet(astral)).toBe(`Hello, ${astral}!`);
   });
+
+  it("stringifies null when a non-TS caller passes null", () => {
+    // greet's param is typed `string`; this bypasses that to document
+    // runtime behavior if an untyped JS caller (or bad JSON) passes null.
+    expect(greet(null as any)).toBe("Hello, null!");
+  });
+
+  it("stringifies undefined when a non-TS caller passes undefined", () => {
+    expect(greet(undefined as any)).toBe("Hello, undefined!");
+  });
+
+  it("greets with empty string when name is an empty string (explicit null-vs-empty check)", () => {
+    expect(greet("")).not.toBe(greet(null as any));
+  });
 });
