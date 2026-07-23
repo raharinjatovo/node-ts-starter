@@ -1,0 +1,59 @@
+{
+  "id": "node-ts-starter:next-feature-decision",
+  "namespace": "reasoningbank",
+  "project_scope": "node-ts-starter",
+  "task": "What is the right next feature to add to the node-ts-starter template?",
+  "pipeline": {
+    "retrieve": {
+      "queried_namespace": "reasoningbank",
+      "prior_matches": [],
+      "note": "No prior pattern existed for this project/task at time of write; this record seeds future retrieval."
+    },
+    "judge": {
+      "verdict": "success",
+      "reward": 0.92,
+      "rationale": "Decision is internally consistent with the repo's own stated scope-control rule in CLAUDE.md, adds zero new runtime dependencies, and every accepted/rejected item is traceable to an explicit reason rather than taste."
+    },
+    "distill": {
+      "approach": "Evaluate every candidate addition against a single guiding principle (zero new runtime deps + universal value to any template consumer) before accepting.",
+      "decision": {
+        "accepted": [
+          {
+            "item": "GitHub Actions CI workflow",
+            "path": ".github/workflows/ci.yml",
+            "spec": "pnpm/action-setup@v4 + actions/setup-node@v4 (cache: pnpm); pnpm install --frozen-lockfile; single Node 22.x job running tsc --noEmit -> pnpm build -> pnpm test; triggers on push/PR to main"
+          },
+          {
+            "item": "README.md",
+            "spec": "~40 lines: CI badge, quickstart (install/dev/test/build), scripts table, one line noting no framework included by design"
+          }
+        ],
+        "rejected": [
+          { "item": "ESLint/Prettier", "reason": "devDependency weight + bikeshedding; tsc --noEmit already covers correctness at this size; revisit only if a team style guide becomes needed" },
+          { "item": "HTTP server example (Express/Fastify)", "reason": "contradicts this repo's CLAUDE.md rule: add Express/Fastify only when a real endpoint is needed" },
+          { "item": "Dockerfile", "reason": "no deployment target exists yet; premature ops concern" },
+          { "item": "Env-loading pattern (dotenv etc.)", "reason": "YAGNI; nothing in the codebase reads env vars currently" }
+        ]
+      },
+      "guiding_principle": "This is a minimal starter template: weigh every addition against bloat; accept only additions with zero new runtime dependencies and universal value to any consumer of the template."
+    },
+    "consolidate": {
+      "dedup_key": "node-ts-starter:next-feature-decision",
+      "supersedes": null,
+      "stale_after_days": null,
+      "revisit_trigger": "Re-run this evaluation only if inputs change: a real deployment target appears (revisit Dockerfile), env vars get introduced (revisit env-loading), or a team style guide is requested (revisit ESLint/Prettier)."
+    }
+  },
+  "outcome": "success",
+  "reward": 0.92,
+  "metadata": {
+    "agent_type": "system-architect",
+    "project": "node-ts-starter",
+    "files_changed": 0,
+    "tests_passed": null,
+    "artifact_refs": [
+      "docs/adr/ADR-001-ci-workflow-and-readme-as-next-features.md"
+    ]
+  },
+  "created_at": "2026-07-23T16:01:20Z"
+}
