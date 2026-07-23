@@ -78,4 +78,20 @@ describe("greet", () => {
   it("greets with empty string when name is an empty string (explicit null-vs-empty check)", () => {
     expect(greet("")).not.toBe(greet(null as any));
   });
+
+  it("greets correctly when name is a single letter", () => {
+    expect(greet("A")).toBe("Hello, A!");
+  });
+
+  it("greets correctly when name is a single digit", () => {
+    expect(greet("1")).toBe("Hello, 1!");
+  });
+
+  it("greets correctly when name is a single space character", () => {
+    expect(greet(" ")).toBe("Hello,  !");
+  });
+
+  it("greets correctly when name is a single emoji character", () => {
+    expect(greet("🚀")).toBe("Hello, 🚀!");
+  });
 });
