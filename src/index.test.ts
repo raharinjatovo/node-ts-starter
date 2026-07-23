@@ -36,4 +36,32 @@ describe("greet", () => {
   it("greets correctly when name is a numeric-like string", () => {
     expect(greet("123")).toBe("Hello, 123!");
   });
+
+  it("greets correctly when name contains right-to-left script (Arabic/Hebrew)", () => {
+    expect(greet("مرحبا שלום")).toBe("Hello, مرحبا שלום!");
+  });
+
+  it("greets correctly when name contains combining diacritics (NFD form)", () => {
+    const nfd = "é"; // "é" as base char + combining acute accent
+    expect(greet(nfd)).toBe(`Hello, ${nfd}!`);
+  });
+
+  it("greets correctly when name contains a ZWJ emoji sequence (family emoji)", () => {
+    const family = "👨‍👩‍👧‍👦";
+    expect(greet(family)).toBe(`Hello, ${family}!`);
+  });
+
+  it("greets correctly when name contains an emoji with skin-tone modifier", () => {
+    expect(greet("👍🏽")).toBe("Hello, 👍🏽!");
+  });
+
+  it("greets correctly when name mixes multiple scripts and symbols", () => {
+    const mixed = "José Владимир 田中さん 🎉";
+    expect(greet(mixed)).toBe(`Hello, ${mixed}!`);
+  });
+
+  it("greets correctly when name contains an astral-plane character (surrogate pair)", () => {
+    const astral = "𝔘𝔫𝔦𝔠𝔬𝔡𝔢"; // Mathematical Fraktur, outside BMP
+    expect(greet(astral)).toBe(`Hello, ${astral}!`);
+  });
 });
