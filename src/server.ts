@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import { rateLimit } from "express-rate-limit";
 import { loadConfig } from "./config.js";
+import { createItemsRouter } from "./items.js";
 import { logger } from "./logger.js";
 
 export class HttpError extends Error {
@@ -49,6 +50,8 @@ export function createApp(): Express {
   });
 
   app.use("/health", healthRateLimit);
+
+  app.use("/items", createItemsRouter());
 
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
