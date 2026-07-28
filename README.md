@@ -28,3 +28,7 @@ pnpm build
 
 This starter intentionally ships without a web framework — add Express, Fastify,
 or similar only once there's a real endpoint to serve.
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
