@@ -1,5 +1,14 @@
-import express, { type Express } from "express";
+import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import { logger } from "./logger.js";
+
+export class HttpError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.status = status;
+  }
+}
 
 export function createApp(): Express {
   const app = express();
@@ -21,7 +30,27 @@ export function createApp(): Express {
     res.json({ status: "ok" });
   });
 
+  app.use(notFoundHandler);
+  app.use(errorHandler);
+
   return app;
+}
+
+export function notFoundHandler(_req: Request, res: Response): void {
+  res.status(404).json({ error: "Not Found" });
+}
+
+export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction): void {
+  const status = err instanceof HttpError ? err.status : 500;
+  const message = err instanceof Error ? err.message : "Internal Server Error";
+
+  if (status >= 500) {
+    logger.error(message, { status, stack: err instanceof Error ? err.stack : undefined });
+  } else {
+    logger.warn(message, { status });
+  }
+
+  res.status(status).json({ error: message });
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
