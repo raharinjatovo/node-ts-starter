@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import { rateLimit } from "express-rate-limit";
+import { loadConfig } from "./config.js";
 import { logger } from "./logger.js";
 
 export class HttpError extends Error {
@@ -23,6 +24,7 @@ function readVersion(): string {
 }
 
 export function createApp(): Express {
+  const config = loadConfig();
   const app = express();
 
   app.use((req, res, next) => {
@@ -58,7 +60,7 @@ export function createApp(): Express {
       version: readVersion(),
       uptimeSeconds: Math.floor(process.uptime()),
       timestamp: new Date().toISOString(),
-      env: process.env.NODE_ENV ?? "development",
+      env: config.nodeEnv,
     });
   });
 
@@ -86,7 +88,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+  const { port } = loadConfig();
   createApp().listen(port, () => {
     logger.info("server listening", { port });
   });

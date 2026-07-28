@@ -1,4 +1,6 @@
-type Level = "debug" | "info" | "warn" | "error";
+export type Level = "debug" | "info" | "warn" | "error";
+
+export const LOG_LEVELS: readonly Level[] = ["debug", "info", "warn", "error"];
 
 const LEVEL_WEIGHT: Record<Level, number> = {
   debug: 10,
