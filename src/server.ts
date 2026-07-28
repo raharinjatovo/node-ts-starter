@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
+import { rateLimit } from "express-rate-limit";
 import { logger } from "./logger.js";
 
 export class HttpError extends Error {
@@ -36,6 +37,16 @@ export function createApp(): Express {
     });
     next();
   });
+
+  const healthRateLimit = rateLimit({
+    windowMs: 60_000,
+    limit: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (_req, _res, next) => next(new HttpError(429, "Too Many Requests")),
+  });
+
+  app.use("/health", healthRateLimit);
 
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });

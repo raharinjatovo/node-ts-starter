@@ -23,6 +23,21 @@ describe("GET /health/details", () => {
   });
 });
 
+describe("rate limiting on /health*", () => {
+  it("returns 429 once the limit is exceeded", async () => {
+    const app = createApp();
+
+    for (let i = 0; i < 60; i++) {
+      const res = await request(app).get("/health");
+      expect(res.status).toBe(200);
+    }
+
+    const res = await request(app).get("/health/details");
+    expect(res.status).toBe(429);
+    expect(res.body).toEqual({ error: "Too Many Requests" });
+  });
+});
+
 describe("unmatched routes", () => {
   it("returns 404 with a JSON error body", async () => {
     const res = await request(createApp()).get("/does-not-exist");
