@@ -4,6 +4,7 @@ import { rateLimit } from "express-rate-limit";
 import { loadConfig } from "./config.js";
 import { createItemsRouter } from "./items.js";
 import { logger } from "./logger.js";
+import { requestIdMiddleware } from "./requestId.js";
 
 export class HttpError extends Error {
   status: number;
@@ -28,6 +29,8 @@ export function createApp(): Express {
   const config = loadConfig();
   const app = express();
 
+  app.use(requestIdMiddleware);
+
   app.use((req, res, next) => {
     const start = Date.now();
     res.on("finish", () => {
@@ -36,6 +39,7 @@ export function createApp(): Express {
         path: req.path,
         status: res.statusCode,
         durationMs: Date.now() - start,
+        requestId: res.locals.requestId,
       });
     });
     next();
@@ -80,11 +84,12 @@ export function notFoundHandler(_req: Request, res: Response): void {
 export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction): void {
   const status = err instanceof HttpError ? err.status : 500;
   const message = err instanceof Error ? err.message : "Internal Server Error";
+  const requestId = res.locals.requestId as string | undefined;
 
   if (status >= 500) {
-    logger.error(message, { status, stack: err instanceof Error ? err.stack : undefined });
+    logger.error(message, { status, stack: err instanceof Error ? err.stack : undefined, requestId });
   } else {
-    logger.warn(message, { status });
+    logger.warn(message, { status, requestId });
   }
 
   res.status(status).json({ error: message });
