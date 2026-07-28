@@ -11,6 +11,18 @@ describe("GET /health", () => {
   });
 });
 
+describe("GET /health/details", () => {
+  it("returns status, version, uptime, timestamp, and env", async () => {
+    const res = await request(createApp()).get("/health/details");
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ status: "ok" });
+    expect(typeof res.body.version).toBe("string");
+    expect(typeof res.body.uptimeSeconds).toBe("number");
+    expect(typeof res.body.env).toBe("string");
+    expect(new Date(res.body.timestamp).toString()).not.toBe("Invalid Date");
+  });
+});
+
 describe("unmatched routes", () => {
   it("returns 404 with a JSON error body", async () => {
     const res = await request(createApp()).get("/does-not-exist");

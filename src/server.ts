@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import express, { type Express, type NextFunction, type Request, type Response } from "express";
 import { logger } from "./logger.js";
 
@@ -7,6 +8,16 @@ export class HttpError extends Error {
   constructor(status: number, message: string) {
     super(message);
     this.status = status;
+  }
+}
+
+function readVersion(): string {
+  try {
+    const pkgUrl = new URL("../package.json", import.meta.url);
+    const pkg = JSON.parse(readFileSync(pkgUrl, "utf-8")) as { version?: string };
+    return pkg.version ?? "unknown";
+  } catch {
+    return "unknown";
   }
 }
 
@@ -28,6 +39,16 @@ export function createApp(): Express {
 
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
+  });
+
+  app.get("/health/details", (_req, res) => {
+    res.json({
+      status: "ok",
+      version: readVersion(),
+      uptimeSeconds: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV ?? "development",
+    });
   });
 
   app.use(notFoundHandler);
