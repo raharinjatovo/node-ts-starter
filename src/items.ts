@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import express, { type Router } from "express";
 import { z } from "zod";
+import { requireAuth } from "./auth.js";
 import { HttpError } from "./server.js";
 
 export interface Item {
@@ -28,13 +29,14 @@ function parseOrThrow<T>(schema: z.ZodType<T>, body: unknown): T {
   return result.data;
 }
 
-export function createItemsRouter(): Router {
+export function createItemsRouter(jwtSecret: string): Router {
   const items = new Map<string, Item>();
   const router = express.Router();
+  const auth = requireAuth(jwtSecret);
 
   router.use(express.json());
 
-  router.post("/", (req, res) => {
+  router.post("/", auth, (req, res) => {
     const body = parseOrThrow(createItemSchema, req.body);
     const item: Item = { id: randomUUID(), name: body.name, description: body.description };
     items.set(item.id, item);
@@ -51,7 +53,7 @@ export function createItemsRouter(): Router {
     res.json(item);
   });
 
-  router.patch("/:id", (req, res) => {
+  router.patch<{ id: string }>("/:id", auth, (req, res) => {
     const item = items.get(req.params.id);
     if (!item) throw new HttpError(404, "Item not found");
 
@@ -65,7 +67,7 @@ export function createItemsRouter(): Router {
     res.json(updated);
   });
 
-  router.delete("/:id", (req, res) => {
+  router.delete<{ id: string }>("/:id", auth, (req, res) => {
     const item = items.get(req.params.id);
     if (!item) throw new HttpError(404, "Item not found");
     items.delete(item.id);

@@ -53,9 +53,17 @@ export function createApp(): Express {
     handler: (_req, _res, next) => next(new HttpError(429, "Too Many Requests")),
   });
 
+  const itemsRateLimit = rateLimit({
+    windowMs: 60_000,
+    limit: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (_req, _res, next) => next(new HttpError(429, "Too Many Requests")),
+  });
+
   app.use("/health", healthRateLimit);
 
-  app.use("/items", createItemsRouter());
+  app.use("/items", itemsRateLimit, createItemsRouter(config.jwtSecret));
 
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });

@@ -8,7 +8,10 @@ export interface AppConfig {
   port: number;
   nodeEnv: NodeEnv;
   logLevel: Level;
+  jwtSecret: string;
 }
+
+export const DEV_JWT_SECRET = "dev-insecure-secret-change-me";
 
 function parsePort(raw: string | undefined): number {
   if (raw === undefined) return 3000;
@@ -38,10 +41,23 @@ function parseLogLevel(raw: string | undefined): Level {
   return raw as Level;
 }
 
+function parseJwtSecret(raw: string | undefined, rawNodeEnv: string | undefined): string {
+  if (raw !== undefined) return raw;
+
+  if (rawNodeEnv === undefined || rawNodeEnv === "production") {
+    throw new Error(`Invalid JWT_SECRET: must be set when NODE_ENV is unset or "production"`);
+  }
+
+  return DEV_JWT_SECRET;
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
+  const nodeEnv = parseNodeEnv(env.NODE_ENV);
+
   return {
     port: parsePort(env.PORT),
-    nodeEnv: parseNodeEnv(env.NODE_ENV),
+    nodeEnv,
     logLevel: parseLogLevel(env.LOG_LEVEL),
+    jwtSecret: parseJwtSecret(env.JWT_SECRET, env.NODE_ENV),
   };
 }
